@@ -1,0 +1,327 @@
+﻿<html>
+<script>
+var _MWP_ConsoleLog = console.log;
+var _MWP_ConsoleWarn = console.warn;
+var _MWP_ConsoleError = console.error;
+console.log = function(...args) 
+{
+  var p = window.parent; if (p !== window) p.postMessage({type:'console.log',args },"*");
+  _MWP_ConsoleLog(...args);
+}
+console.warn = function(...args) 
+{
+  var p = window.parent; if (p !== window) p.postMessage({type:'console.warn',args },"*");
+  _MWP_ConsoleWarn(...args);
+}
+console.error = function(...args) 
+{
+  var p = window.parent; if (p !== window) p.postMessage({type:'console.error',args },"*");
+  _MWP_ConsoleError(...args);
+}
+window.addEventListener("error", function(e) {
+  parent.postMessage({type:'iframe.exception',content:{message: e.message, source: e.filename, lineno: e.lineno, colno: e.colno}},"*");
+});
+</script><!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>自动粘贴器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            padding: 16px;
+        }
+
+        .container {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            width: 100%;
+            margin: auto;
+        }
+
+        .ascii-panel {
+            font-family: inherit;
+            font-size: clamp(10px, 2.5vw, 14px);
+            line-height: 1.5;
+            color: #1a1f2e;
+            white-space: pre;
+            background: #f5f5f5;
+            padding: clamp(10px, 2vw, 16px) clamp(12px, 2.5vw, 20px);
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+            flex: 2;
+            min-width: 280px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .download-panel {
+            flex: 1;
+            min-width: 240px;
+            max-width: 300px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            padding: clamp(20px, 4vw, 28px) clamp(16px, 3vw, 20px);
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .download-panel .icon {
+            font-size: clamp(36px, 8vw, 48px);
+            margin-bottom: 12px;
+        }
+
+        .download-panel h3 {
+            color: #1a1f2e;
+            font-weight: 500;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            margin-bottom: 6px;
+        }
+
+        .download-panel .subtitle {
+            color: #555;
+            font-size: clamp(12px, 3vw, 13px);
+            margin-bottom: 8px;
+        }
+
+        .features {
+            text-align: left;
+            color: #666;
+            font-size: clamp(11px, 2.5vw, 12px);
+            margin: 16px 0;
+            padding-left: 20px;
+            list-style: none;
+        }
+
+        .features li {
+            margin: 6px 0;
+        }
+
+        .features li::before {
+            content: "✓";
+            margin-right: 6px;
+            color: #2a5a90;
+        }
+
+        .btn-download {
+            background: #2a5a90;
+            border: none;
+            border-bottom: 4px solid #1a3a60;
+            color: #fff;
+            font-size: clamp(1rem, 3.5vw, 1.1rem);
+            font-weight: bold;
+            padding: clamp(10px, 2.5vw, 12px) clamp(16px, 3vw, 20px);
+            border-radius: 40px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.1s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-download:hover {
+            background: #3a6aa0;
+        }
+
+        .btn-download:active {
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+        }
+
+        .version {
+            margin-top: 14px;
+            color: #888;
+            font-size: clamp(10px, 2vw, 12px);
+        }
+
+        .note {
+            margin-top: 10px;
+            color: #999;
+            font-size: clamp(9px, 2vw, 11px);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                flex-direction: column;
+                gap: 16px;
+                align-items: center;
+            }
+            
+            .ascii-panel {
+                width: 100%;
+                min-width: auto;
+                padding: 12px;
+            }
+            
+            .download-panel {
+                max-width: 100%;
+                padding: 20px 16px;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1f2e; }
+            .ascii-panel { background: #0d1117; color: #d0e0ff; border-color: #3a4a6a; }
+            .download-panel { background: #0d1117; border-color: #3a4a6a; }
+            .download-panel h3 { color: #e0ecff; }
+            .download-panel .subtitle { color: #a0b0c8; }
+            .features { color: #b0c0d8; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="ascii-panel" id="asciiOutput"></div>
+
+    <div class="download-panel">
+        <div class="icon">
+            <img src="icon.ico" alt="自动粘贴器图标" style="width: 64px; height: 64px; object-fit: contain;">
+        </div>
+        <h3>自动粘贴器</h3>
+        <div class="subtitle">一键粘贴 · 效率工具</div>
+        <ul class="features">
+            <li>批量管理账号列表</li>
+            <li>Ctrl+V 自动粘贴</li>
+            <li>自动保存，断点续传</li>
+            <li>支持导入TXT文件</li>
+            <li>窗口置顶，即用即走</li>
+        </ul>
+        <a href="自动粘贴器.exe" download class="btn-download" id="downloadBtn">⬇️ 免费下载</a>
+        <div class="version">v1.0 · Windows</div>
+        <div class="note">免安装 · 绿色版 · 10.3 MB</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        const TYPE_DELAY = 300;
+        const RESIZE_DEBOUNCE = 200;
+
+        // 优化后的ASCII模板，所有边框完美对齐
+        const ASCII_TEMPLATES = {
+            mobile: `┌──────────────────────────────────┐
+│自动粘贴器              [-] [□] [X]│
+├──────────────────────────────────┤
+│  账号列表:             [ 导 入 ]  │
+│  ┌─────────────────────────────┐ │
+│  │   账号001                    │ │
+│  │   账号002                    │ │
+│  │   账号003                    │ │
+│  │   测试账号@example.com       │ │
+│  │   张三的用户名               │ │
+│  └─────────────────────────────┘ │
+│     Ctrl+V 粘贴下一个             │
+├──────────────────────────────────┤
+│  ▶ 准备就绪                      │
+└──────────────────────────────────┘`,
+            
+            tablet: `┌───────────────────────────────────────────────┐
+│ 自动粘贴器                          [-] [□] [X]│
+├───────────────────────────────────────────────┤
+│  账号列表 (一行一个):                  [ 导 入 ]│
+│  ┌──────────────────────────────────────────┐ │
+│  │  账号001                                 │ │
+│  │  账号002                                 │ │
+│  │  账号003                                 │ │
+│  │  测试账号@example.com                    │ │
+│  │  张三的用户名                             │ │
+│  └──────────────────────────────────────────┘ │
+│       点击软件外面，按 Ctrl+V 粘贴下一个        │
+├───────────────────────────────────────────────┤
+│  ▶ 准备就绪                                   │
+└───────────────────────────────────────────────┘`,
+            
+            desktop: `┌──────────────────────────────────────────────────────────────────┐
+│ 自动粘贴器                                            [-] [□] [X] │
+├──────────────────────────────────────────────────────────────────┤
+│  账号列表 (一行一个):                                    [ 导 入 ] │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │   账号001                                                   │ │
+│  │   账号002                                                   │ │
+│  │   账号003                                                   │ │
+│  │   测试账号@example.com                                       │ │
+│  │   张三的用户名                                               │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                 点击软件外面，按 Ctrl+V 粘贴下一个                 │
+├──────────────────────────────────────────────────────────────────┤
+│  ▶ 准备就绪                                                      │
+└──────────────────────────────────────────────────────────────────┘`
+        };
+
+        function getAsciiContent() {
+            const w = window.innerWidth;
+            if (w <= 480) return ASCII_TEMPLATES.mobile;
+            if (w <= 640) return ASCII_TEMPLATES.tablet;
+            return ASCII_TEMPLATES.desktop;
+        }
+
+        class Typewriter {
+            constructor(element, delay = TYPE_DELAY) {
+                this.el = element;
+                this.delay = delay;
+                this.timer = null;
+            }
+
+            stop() {
+                if (this.timer) {
+                    clearTimeout(this.timer);
+                    this.timer = null;
+                }
+            }
+
+            play(content) {
+                this.stop();
+                const lines = content.split('\n');
+                let index = 0;
+                this.el.textContent = '';
+
+                const next = () => {
+                    if (index < lines.length) {
+                        this.el.textContent += lines[index] + '\n';
+                        index++;
+                        this.timer = setTimeout(next, this.delay);
+                    }
+                };
+                next();
+            }
+        }
+
+        const output = document.getElementById('asciiOutput');
+        const typewriter = new Typewriter(output);
+        
+        typewriter.play(getAsciiContent());
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                typewriter.play(getAsciiContent());
+            }, RESIZE_DEBOUNCE);
+        });
+    })();
+</script>
+</body>
+<style></style><script></script></html>
