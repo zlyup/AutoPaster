@@ -1,2 +1,22 @@
-# AutoPaster
-A lightweight Windows tool for sequential pasting of account lists.
+# 自动粘贴小工具
+
+一个 Windows 桌面小工具，用于顺序粘贴账号列表。
+
+## ✨ 功能
+
+- ✅ 支持导入 TXT 文件（自动识别 UTF-8、GBK 等编码）
+- ✅ 按 `Ctrl+V` 依次粘贴下一个账号，到底自动循环
+- ✅ 自动保存，关闭软件后重新打开内容还在
+- ✅ 窗口始终置顶，随时可用
+- ✅ 智能焦点检测，在软件内编辑时不干扰粘贴
+
+## 🚀 使用方法
+
+1. 点击「导入」按钮选择账号文件，或直接把账号粘贴到文本框里（一行一个）
+2. 点击软件外面的输入框（网页、表格、文档等）
+3. 按 `Ctrl+V` 依次粘贴账号
+
+## 📦 打包成 EXE
+
+```bash
+pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." --name "自动粘贴小工具" paster.py
