@@ -20,3 +20,10 @@
 
 ```bash
 pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." --name "自动粘贴小工具" paster.py
+```
+
+## 📌 使用说明
+
+1. 在项目文件夹新建 `README.md`
+2. 把上面内容复制进去
+3. 保存（编码选 **UTF-8**）
