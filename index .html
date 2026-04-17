@@ -1,4 +1,4 @@
-﻿<html>
+<html>
 <script>
 var _MWP_ConsoleLog = console.log;
 var _MWP_ConsoleWarn = console.warn;
@@ -21,12 +21,15 @@ console.error = function(...args)
 window.addEventListener("error", function(e) {
   parent.postMessage({type:'iframe.exception',content:{message: e.message, source: e.filename, lineno: e.lineno, colno: e.colno}},"*");
 });
-</script><!DOCTYPE html>
+</script>
+
+<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>自动粘贴器</title>
+    <title>自动粘贴小工具 - 效率粘贴助手</title>
+    <link rel="icon" href="icon.ico" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -207,7 +210,7 @@ window.addEventListener("error", function(e) {
             <li>支持导入TXT文件</li>
             <li>窗口置顶，即用即走</li>
         </ul>
-        <a href="自动粘贴器.exe" download class="btn-download" id="downloadBtn">⬇️ 免费下载</a>
+        <a href="自动粘贴小工具.exe" download class="btn-download" id="downloadBtn">⬇️ 免费下载</a>
         <div class="version">v1.0 · Windows</div>
         <div class="note">免安装 · 绿色版 · 10.3 MB</div>
     </div>
